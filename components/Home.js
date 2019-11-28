@@ -1,15 +1,14 @@
 import React, {Component} from 'react'
 import {View, Text, StyleSheet, Button, FlatList, Image, ScrollView} from 'react-native'
 import {Header, Icon, ThemeProvider, Avatar, ListItem} from 'react-native-elements'
-import { createAppContainer } from 'react-navigation'
-import { createStackNavigator } from 'react-navigation-stack'
-import Login from './Login'
+import Axios from 'axios'
 
 const theme = {
     color: '#3184d6'
 }
+
 const data = {
-    name: 'gilangnazar',
+    name: 'kdjhasdjkshadjkahd',
     desc: 'nama aslinya emg panjang bat jdinya gilangnazar aja',
     profilePic: require("../assets/img/profile.jpg"),
     followers: 1000,
@@ -25,23 +24,48 @@ const data = {
     ]
 }
 
-
 class Home extends Component{
+    constructor (props){
+        super(props);
+        this.state={
+            data:''
+        }
+    }
+
+    componentDidMount(){
+        const { navigation } = this.props;
+        const data = navigation.getParam('userdata');
+        this.setState({
+            data: data
+        })
+        console.log(navigation.getParam('userdata'));
+    }
     render(){
         return(
             <ThemeProvider>
                 <NavBarComp/>
                 <ScrollView>
-                    <HeaderComp/>
+                    <HeaderComp
+                    name={this.state.data.nama}
+                    desc={this.state.data.description}
+                    profilePic={this.state.data.image}
+                    />
                     <Button 
                         onPress={() => {
                             this.props.navigation.navigate('Login');
                         }}
                         title="Login"
                     />
-                    <StatusComp/>
+                    <StatusComp
+                    posts={this.state.data.posts}
+                    followers={this.state.data.followers}
+                    following={this.state.data.following}
+                    />
                     <GalleryComp/>
-                    <PostComp/>
+                    <PostComp
+                    name={this.state.data.nama}
+                    profilePic={this.state.data.image}
+                    />
                 </ScrollView>
             </ThemeProvider>
             )
@@ -70,7 +94,8 @@ const NavbarKanan = () =>{
     )
 }
 
-const HeaderComp = () => {
+const HeaderComp = (props) => {
+    const uriProfilePic = `http://192.168.42.212:7200/image/`+ props.profilePic;
     return (
         <>
             <View style={{flex: 4, backgroundColor: theme.color, marginTop: 0}}>
@@ -81,15 +106,15 @@ const HeaderComp = () => {
                         title='Avatar'
                         titleStyle={{fontSize: 11}}
                         rounded
-                        source={data.profilePic}
+                        source={{uri: `${uriProfilePic}`}}
                         />
                     </View>
                     <View style={{flex: 1, paddingBottom: 20}}>
                         <Text style={{color: '#fff', textAlign: "center", fontWeight: '400', fontSize: 20, paddingTop: 11}}>
-                            {data.name}
+                            {props.name}
                         </Text>
                         <Text style={{color: '#fff', textAlign: 'center', fontWeight: '100', fontSize: 11}}>
-                            {data.desc}
+                            {props.desc}
                         </Text>
                     </View>
                 </View>
@@ -98,25 +123,25 @@ const HeaderComp = () => {
     )
 }
 
-const StatusComp = () => {
+const StatusComp = (props) => {
     return(
         <View style={{flex: 2, paddingTop: 15}}>
             <View style={{flex: 2, borderBottomWidth: 0.5, borderBottomColor: '#ebebeb', flexDirection: 'row', justifyContent: 'space-between', paddingLeft: '10%', paddingRight: '10%'}}>
                 <View style={{flexDirection: 'column', marginBottom: 15, justifyContent: 'space-between'}}>
                     <View style={{ flex: 1 }} />
-                        <Text style={{textAlign: 'center'}}>{data.posts}</Text>
+                        <Text style={{textAlign: 'center'}}>{props.posts}</Text>
                         <Text style={{textAlign: 'center', opacity: 0.5}}>Posts</Text>
                     <View style={{ flex: 1 }} />
                 </View>
                 <View style={{marginBottom: 15}}>
                     <View style={{ flex: 1 }} />
-                        <Text style={{textAlign: 'center'}}>{data.followers}</Text>
+                        <Text style={{textAlign: 'center'}}>{props.followers}</Text>
                         <Text style={{textAlign: 'center', opacity: 0.5}}>Followers</Text>
                     <View style={{ flex: 1 }} />
                 </View>
                 <View style={{marginBottom: 15}}>
                     <View style={{ flex: 1 }} />
-                        <Text style={{textAlign: 'center'}}>{data.following}</Text>
+                        <Text style={{textAlign: 'center'}}>{props.following}</Text>
                         <Text style={{textAlign: 'center', opacity: 0.5}}>Following</Text>
                     <View style={{ flex: 1 }} />
                 </View>
@@ -145,7 +170,8 @@ const GalleryComp = () => {
     )
 }
 
-const PostComp = () => {
+const PostComp = (props) => {
+    const uriProfilePic = `http://192.168.42.212:7200/image/`+ props.profilePic;
     return(
         <View style={{flex: 5}}>
             <View style={{flex:0.1, justifyContent: 'center', marginTop: 10, marginLeft: 12}}>
@@ -153,8 +179,8 @@ const PostComp = () => {
             </View>
             <View style={{flex: 0.5}}>
                 <ListItem 
-                leftAvatar={{title: data.name[0], source: data.profilePic, rounded: false, size: 60}} 
-                title={data.name}
+                leftAvatar={{title: data.name[0], source: {uri: `${uriProfilePic}`}, rounded: false, size: 60}} 
+                title={props.name}
                 subtitle={ <SubtitleComp/> }
                 chevron
                 />
@@ -188,13 +214,16 @@ const SubtitleComp = () => {
 
 const Navigator = createStackNavigator({
     Home: {
-        screen: Home,
+        screen: Login,
         navigationOptions: {
             header: null
         }
     },
-    Login: {
-        screen: Login
+    Profile: {
+        screen: Home,
+        navigationOptions: {
+            header: null
+        }
     }
 })
 
